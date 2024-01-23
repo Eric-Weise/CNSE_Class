@@ -73,11 +73,16 @@ func TestAddHardCodedItem(t *testing.T) {
 	//I will get you started, uncomment the lines below to add to the DB
 	//and ensure no errors:
 	//---------------------------------------------------------------
-	//err := DB.AddItem(item)
-	//assert.NoError(t, err, "Error adding item to DB")
+
+	err := DB.AddItem(item)
+	assert.NoError(t, err, "Error adding item to DB")
 
 	//TODO: Now finish the test case by looking up the item in the DB
 	//and making sure it matches the item that you put in the DB above
+
+	itemFromDB, err := DB.GetItem(item.Id)
+	assert.NoError(t, err, "Error getting item from DB")
+	assert.ObjectsAreEqual(item, itemFromDB)
 }
 
 func TestAddRandomStructItem(t *testing.T) {
@@ -90,6 +95,8 @@ func TestAddRandomStructItem(t *testing.T) {
 	assert.NoError(t, err, "Created fake item OK")
 
 	//TODO: Complete the test
+	err = DB.AddItem(item)
+	assert.NoError(t, err, "Error adding item to DB")
 }
 
 func TestAddRandomItem(t *testing.T) {
@@ -101,18 +108,79 @@ func TestAddRandomItem(t *testing.T) {
 	}
 
 	t.Log("Testing Adding an Item with Random Fields: ", item)
-
-}
-
-// TODO: Please delete this test from your submission, it does not do anything
-// but i wanted to demonstrate how you can starting shelling out your tests
-// and then implment them later.  The go testing framework provides a
-// Skip() function that just tells the testing framework to skip or ignore
-// this test function
-func TestAddPlaceholderTest(t *testing.T) {
-	t.Skip("Placeholder test not implemented yet")
 }
 
 //TODO: Create additional tests to showcase the correct operation of your program
 //for example getting an item, getting all items, updating items, and so on. Be
 //creative here.
+
+func TestGetItem(t *testing.T) {
+	item, err := DB.GetItem(2)
+	assert.NoError(t, err, "Error getting item from DB")
+	fmt.Println("Success getting item from db: ", item)
+}
+
+func TestGetAllItems(t *testing.T) {
+	var allItems []db.ToDoItem
+
+	allItems, err := DB.GetAllItems()
+	assert.NoError(t, err, "Error getting all items from db")
+	fmt.Println("All Items: ", allItems)
+}
+
+func TestUpdateItem(t *testing.T) {
+	testItem := db.ToDoItem{
+		Id:     50,
+		Title:  "Janitor",
+		IsDone: false,
+	}
+	err := DB.AddItem(testItem)
+	assert.NoError(t, err, "Error adding item to DB")
+
+	updatesToItem := db.ToDoItem{
+		Id:     50,
+		Title:  "Electrician",
+		IsDone: true,
+	}
+
+	DB.UpdateItem(updatesToItem)
+
+	itemFromDB, err := DB.GetItem(50)
+	assert.NoError(t, err, "Error Updating item in  DB")
+
+	assert.NotEqual(t, testItem, itemFromDB)
+}
+
+func TestDeleteItem(t *testing.T) {
+	testItem := db.ToDoItem{
+		Id:     567,
+		Title:  "ToBeDeleted",
+		IsDone: false,
+	}
+	err := DB.AddItem(testItem)
+	assert.NoError(t, err, "Error adding item to DB")
+
+	DB.DeleteItem(testItem.Id)
+
+	var allItems []db.ToDoItem
+
+	allItems, err = DB.GetAllItems()
+	assert.NoError(t, err, "Error getting all items from db")
+	assert.NotContains(t, allItems, testItem)
+}
+
+func TestChangeDoneStatus(t *testing.T) {
+	item, err := DB.GetItem(3)
+	assert.NoError(t, err, "Error getting item from DB")
+
+	originalStatus := item.IsDone
+	if originalStatus == true {
+		DB.ChangeItemDoneStatus(item.Id, false)
+	} else {
+		DB.ChangeItemDoneStatus(item.Id, true)
+	}
+
+	item, err = DB.GetItem(3)
+	assert.NoError(t, err, "Error getting item from DB")
+	assert.NotEqual(t, originalStatus, item.IsDone)
+}
