@@ -58,6 +58,12 @@ const (
 //						   on how to use it.
 //
 //	 YOUR ANSWER: <GOES HERE>
+//
+// The flag package works by taking user input that controls the flow of the program. When a user
+// selects a flag, they are picking a functoinality to process. They are prompted with
+// options that allow them to perform an operation. For instance, they can type 'a' to add an item to the database.
+// If they type 'q', they can retrieve an item from the database, so on and so forth.
+
 func processCmdLineFlags() (AppOptType, error) {
 	flag.StringVar(&dbFileNameFlag, "db", "./data/todo.json", "Name of the database file")
 	flag.BoolVar(&restoreDbFlag, "restore", false, "Restore the database from the backup file")
